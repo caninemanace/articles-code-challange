@@ -76,6 +76,16 @@ class Author:
         print(f"Author with ID {author_id} deleted")
 
     @classmethod
+    def all(cls):
+        from lib.db.connection import get_connection
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM authors")
+        rows = cursor.fetchall()
+        conn.close()
+        return [cls(id=row['id'], name=row['name']) for row in rows] if rows else []
+
+    @classmethod
     def get_by_id(cls, author_id):
         from lib.db.connection import get_connection
         conn = get_connection()

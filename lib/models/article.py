@@ -11,6 +11,7 @@ class Article:
     @property
     def title(self):
         return self._title
+
     @title.setter
     def title(self, value):
         if not isinstance(value, str):
@@ -22,6 +23,7 @@ class Article:
     @property
     def author_id(self):
         return self._author_id
+
     @author_id.setter
     def author_id(self, value):
         if not isinstance(value, int):
@@ -31,6 +33,7 @@ class Article:
     @property
     def magazine_id(self):
         return self._magazine_id
+
     @magazine_id.setter
     def magazine_id(self, value):
         if not isinstance(value, int):
@@ -40,6 +43,7 @@ class Article:
     @property
     def id(self):
         return self._id
+
     @id.setter
     def id(self, value):
         if value is not None and not isinstance(value, int):
@@ -75,6 +79,7 @@ class Article:
         article = cls(title=title, author_id=author_id, magazine_id=magazine_id)
         cls.save(article)
         return article
+
     @classmethod
     def update(cls, article_id, title=None, author_id=None, magazine_id=None):
         from lib.db.connection import get_connection
@@ -82,7 +87,6 @@ class Article:
         cursor = conn.cursor()
         updates = []
         params = []
-
         if title is not None:
             updates.append("title = ?")
             params.append(title)
@@ -92,7 +96,6 @@ class Article:
         if magazine_id is not None:
             updates.append("magazine_id = ?")
             params.append(magazine_id)
-
         if updates:
             params.append(article_id)
             cursor.execute(f"UPDATE articles SET {', '.join(updates)} WHERE id = ?", tuple(params))
@@ -100,8 +103,8 @@ class Article:
             print(f"Article with ID {article_id} updated successfully!")
         else:
             print("No updates provided.")
-
         conn.close()
+
     @classmethod
     def delete(cls, article_id):
         from lib.db.connection import get_connection
