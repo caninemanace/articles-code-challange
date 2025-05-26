@@ -50,6 +50,24 @@ class Author:
         author.save(author)
         return author
     @classmethod
+    def update(cls, author_id, name):
+        from lib.db.connection import get_connection
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE authors SET name = ? WHERE id = ?", (name, author_id))
+        conn.commit()
+        conn.close()
+        print(f"Author with ID {author_id} updated to name {name}")
+    @classmethod
+    def delete(cls, author_id):
+        from lib.db.connection import get_connection
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM authors WHERE id = ?", (author_id,))
+        conn.commit()
+        conn.close()
+        print(f"Author with ID {author_id} deleted")
+    @classmethod
     def get_by_id(cls, author_id):
         from lib.db.connection import get_connection
         conn = get_connection()

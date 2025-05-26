@@ -75,6 +75,42 @@ class Article:
         article = cls(title=title, author_id=author_id, magazine_id=magazine_id)
         cls.save(article)
         return article
+    @classmethod
+    def update(cls, article_id, title=None, author_id=None, magazine_id=None):
+        from lib.db.connection import get_connection
+        conn = get_connection()
+        cursor = conn.cursor()
+        updates = []
+        params = []
+
+        if title is not None:
+            updates.append("title = ?")
+            params.append(title)
+        if author_id is not None:
+            updates.append("author_id = ?")
+            params.append(author_id)
+        if magazine_id is not None:
+            updates.append("magazine_id = ?")
+            params.append(magazine_id)
+
+        if updates:
+            params.append(article_id)
+            cursor.execute(f"UPDATE articles SET {', '.join(updates)} WHERE id = ?", tuple(params))
+            conn.commit()
+            print(f"Article with ID {article_id} updated successfully!")
+        else:
+            print("No updates provided.")
+
+        conn.close()
+    @classmethod
+    def delete(cls, article_id):
+        from lib.db.connection import get_connection
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM articles WHERE id = ?", (article_id,))
+        conn.commit()
+        conn.close()
+        print(f"Article with ID {article_id} deleted successfully!")
 
     @classmethod
     def get_by_id(cls, article_id):

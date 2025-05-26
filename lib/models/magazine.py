@@ -70,6 +70,32 @@ class Magazine:
         magazine = cls(name=name, category=category)
         magazine.save(magazine)
         return magazine
+    
+    @classmethod
+    def update(cls, magazine_id, name=None, category=None):
+        from lib.db.connection import get_connection
+        conn = get_connection()
+        cursor = conn.cursor()
+        if name is not None:
+            cursor.execute("UPDATE magazines SET name = ? WHERE id = ?", (name, magazine_id))
+        if category is not None:
+            cursor.execute("UPDATE magazines SET category = ? WHERE id = ?", (category, magazine_id))
+        conn.commit()
+        conn.close()
+        print(f"Magazine with ID {magazine_id} updated")
+        if name:
+            print(f"Name updated to {name}")
+        if category:
+            print(f"Category updated to {category}")
+    @classmethod
+    def delete(cls, magazine_id):
+        from lib.db.connection import get_connection
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM magazines WHERE id = ?", (magazine_id,))
+        conn.commit()
+        conn.close()
+        print(f"Magazine with ID {magazine_id} deleted")
 
     @classmethod
     def get_by_id(cls, magazine_id):
