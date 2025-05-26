@@ -95,8 +95,6 @@ class Author:
         conn.close()
         return cls(id=row['id'], name=row['name']) if row else None
 
-    # Instance methods
-
     def articles(self):
         from lib.models.article import Article
         return Article.articles_by_author(self.id)
