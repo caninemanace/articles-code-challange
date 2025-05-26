@@ -139,5 +139,48 @@ class Magazine:
         rows = cursor.fetchall()
         conn.close()
         return [dict(row) for row in rows]
+    def contributors(self):
+        from lib.db.connection import get_connection
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT DISTINCT authors.*
+            FROM authors
+            JOIN articles ON articles.author_id = authors.id
+            WHERE articles.magazine_id = ?
+        """, (self.id,))
+        rows = cursor.fetchall()
+        conn.close()
+        return [dict(row) for row in rows] if rows else []
+
+    def article_titles(self):
+        from lib.db.connection import get_connection
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT title FROM articles
+            WHERE magazine_id = ?
+        """, (self.id,))
+        rows = cursor.fetchall()
+        conn.close()
+        return [row['title'] for row in rows] if rows else []
+
+    def contributing_authors(self):
+        from lib.db.connection import get_connection
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT authors.*, COUNT(articles.id) as article_count
+            FROM authors
+            JOIN articles ON articles.author_id = authors.id
+            WHERE articles.magazine_id = ?
+            GROUP BY authors.id
+            HAVING COUNT(articles.id) > 2
+        """, (self.id,))
+        rows = cursor.fetchall()
+        conn.close()
+        return [dict(row) for row in rows] if rows else []
+
+    
 
     

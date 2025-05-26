@@ -1,14 +1,15 @@
 class Author:
-
-    def __init__(self, name,id=None):
+    def __init__(self, name, id=None):
         self.id = id
         self.name = name
+
     def __repr__(self):
         return f"Author(id={self.id}, name='{self.name}')"
-    
+
     @property
     def name(self):
         return self._name
+
     @name.setter
     def name(self, value):
         if not isinstance(value, str):
@@ -16,15 +17,17 @@ class Author:
         if len(value) < 1:
             raise ValueError("Name cannot be empty")
         self._name = value
+
     @property
     def id(self):
         return self._id
+
     @id.setter
     def id(self, value):
         if value is not None and not isinstance(value, int):
             raise ValueError("ID must be an integer or None")
-        self._id = value\
-        
+        self._id = value
+
     @classmethod
     def drop_table(cls):
         from lib.db.connection import get_connection
@@ -34,6 +37,7 @@ class Author:
         conn.commit()
         conn.close()
         print("Author table dropped successfully!")
+
     @classmethod
     def save(cls, author):
         from lib.db.connection import get_connection
@@ -44,11 +48,13 @@ class Author:
         conn.commit()
         conn.close()
         print(f"Author {author.name} saved with ID {author.id}")
+
     @classmethod
     def create(cls, name):
         author = cls(name=name)
-        author.save(author)
+        cls.save(author)
         return author
+
     @classmethod
     def update(cls, author_id, name):
         from lib.db.connection import get_connection
@@ -58,6 +64,7 @@ class Author:
         conn.commit()
         conn.close()
         print(f"Author with ID {author_id} updated to name {name}")
+
     @classmethod
     def delete(cls, author_id):
         from lib.db.connection import get_connection
@@ -67,6 +74,7 @@ class Author:
         conn.commit()
         conn.close()
         print(f"Author with ID {author_id} deleted")
+
     @classmethod
     def get_by_id(cls, author_id):
         from lib.db.connection import get_connection
@@ -75,9 +83,8 @@ class Author:
         cursor.execute("SELECT * FROM authors WHERE id = ?", (author_id,))
         row = cursor.fetchone()
         conn.close()
-        if row:
-            return cls(id=row['id'], name=row['name'])
-        return None
+        return cls(id=row['id'], name=row['name']) if row else None
+
     @classmethod
     def get_by_name(cls, name):
         from lib.db.connection import get_connection
@@ -87,17 +94,14 @@ class Author:
         row = cursor.fetchone()
         conn.close()
         return cls(id=row['id'], name=row['name']) if row else None
-    @classmethod
-    def articles_by_author(cls, author_id):
-        from lib.db.connection import get_connection
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM articles WHERE author_id = ?", (author_id,))
-        rows = cursor.fetchall()
-        conn.close()
-        return [dict(row) for row in rows] if rows else []
-    @classmethod
-    def magazines_by_author(cls, author_id):
+
+    # Instance methods
+
+    def articles(self):
+        from lib.models.article import Article
+        return Article.articles_by_author(self.id)
+
+    def magazines(self):
         from lib.db.connection import get_connection
         conn = get_connection()
         cursor = conn.cursor()
@@ -106,10 +110,29 @@ class Author:
             FROM magazines
             JOIN articles ON articles.magazine_id = magazines.id
             WHERE articles.author_id = ?
-        """, (author_id,))
+        """, (self.id,))
         rows = cursor.fetchall()
         conn.close()
         return [dict(row) for row in rows] if rows else []
+
+    def add_article(self, magazine, title):
+        from lib.models.article import Article
+        return Article.create(title=title, author_id=self.id, magazine_id=magazine.id)
+
+    def topic_areas(self):
+        from lib.db.connection import get_connection
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT DISTINCT magazines.category
+            FROM magazines
+            JOIN articles ON articles.magazine_id = magazines.id
+            WHERE articles.author_id = ?
+        """, (self.id,))
+        rows = cursor.fetchall()
+        conn.close()
+        return [row['category'] for row in rows] if rows else []
+
 
 
 

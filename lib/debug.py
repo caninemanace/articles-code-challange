@@ -60,7 +60,7 @@ if __name__ == "__main__":
     Article.delete(article2.id)
     print(f"Deleted article with ID {article2.id}")
 
-    # Show remaining articles
+    
     print(" Remaining articles:")
     for art in Article.all():
         print(art)
